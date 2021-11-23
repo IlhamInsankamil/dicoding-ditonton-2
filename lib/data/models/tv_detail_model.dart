@@ -32,7 +32,7 @@ class TVDetailResponse extends Equatable {
     required this.seasons,
   });
 
-  final String backdropPath;
+  final String? backdropPath;
   final List<dynamic> createdBy;
   final List<int> episodeRunTime;
   final DateTime firstAirDate;

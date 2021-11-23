@@ -1,7 +1,7 @@
-import 'package:ditonton/common/state_enum.dart';
-import 'package:ditonton/presentation/provider/tv_episode_notifier.dart';
+import 'package:ditonton/presentation/bloc/tv_episode_bloc.dart';
 import 'package:ditonton/presentation/widgets/custom_card_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class TVEpisodesPage extends StatefulWidget {
@@ -23,9 +23,10 @@ class _TVEpisodesPageState extends State<TVEpisodesPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        Provider.of<TVEpisodeNotifier>(context, listen: false).fetchTVEpisodes(
-            widget.tvId, widget.seasonNumber, widget.seasonName));
+
+    context
+        .read<TvEpisodeBloc>()
+        .add(GetEpisode(widget.tvId, widget.seasonNumber, widget.seasonName));
   }
 
   @override
@@ -36,16 +37,16 @@ class _TVEpisodesPageState extends State<TVEpisodesPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Consumer<TVEpisodeNotifier>(
-          builder: (context, data, child) {
-            if (data.tvEpisodesState == RequestState.Loading) {
+        child: BlocBuilder<TvEpisodeBloc, TvEpisodeState>(
+          builder: (context, state) {
+            if (state is TvEpisodeLoading) {
               return Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (data.tvEpisodesState == RequestState.Loaded) {
+            } else if (state is TvEpisodeHasData) {
               return ListView.builder(
                 itemBuilder: (context, index) {
-                  final episode = data.tvEpisodes[index];
+                  final episode = state.result[index];
                   return CustomCard(
                       episode.id,
                       0,
@@ -54,13 +55,12 @@ class _TVEpisodesPageState extends State<TVEpisodesPage> {
                       episode.stillPath,
                       1);
                 },
-                itemCount: data.tvEpisodes.length,
+                itemCount: state.result.length,
               );
+            } else if (state is TvEpisodeError) {
+              return Text(state.message);
             } else {
-              return Center(
-                key: Key('error_message'),
-                child: Text(data.message),
-              );
+              return Text('Failed');
             }
           },
         ),

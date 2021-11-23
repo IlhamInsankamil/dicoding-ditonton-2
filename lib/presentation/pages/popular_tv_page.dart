@@ -1,7 +1,7 @@
-import 'package:ditonton/common/state_enum.dart';
-import 'package:ditonton/presentation/provider/popular_tv_notifier.dart';
+import 'package:ditonton/presentation/bloc/tv_popular_bloc.dart';
 import 'package:ditonton/presentation/widgets/custom_card_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class PopularTVPage extends StatefulWidget {
@@ -15,9 +15,8 @@ class _PopularTVPageState extends State<PopularTVPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        Provider.of<PopularTVNotifier>(context, listen: false)
-            .fetchPopularTV());
+
+    context.read<TvPopularBloc>().add(LoadPopular());
   }
 
   @override
@@ -28,26 +27,25 @@ class _PopularTVPageState extends State<PopularTVPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Consumer<PopularTVNotifier>(
-          builder: (context, data, child) {
-            if (data.state == RequestState.Loading) {
+        child: BlocBuilder<TvPopularBloc, TvPopularState>(
+          builder: (context, state) {
+            if (state is TvPopularLoading) {
               return Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (data.state == RequestState.Loaded) {
+            } else if (state is TvPopularHasData) {
               return ListView.builder(
                 itemBuilder: (context, index) {
-                  final tv = data.tvs[index];
+                  final tv = state.result[index];
                   return CustomCard(tv.id, tv.isMovie, tv.name, tv.overview,
                       tv.posterPath, 0);
                 },
-                itemCount: data.tvs.length,
+                itemCount: state.result.length,
               );
+            } else if (state is TvPopularError) {
+              return Text(state.message);
             } else {
-              return Center(
-                key: Key('error_message'),
-                child: Text(data.message),
-              );
+              return Text('Failed');
             }
           },
         ),
