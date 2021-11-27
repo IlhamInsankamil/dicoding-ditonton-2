@@ -37,7 +37,7 @@ class _PopularMoviesPageState extends State<PopularMoviesPage> {
               return ListView.builder(
                 itemBuilder: (context, index) {
                   final movie = state.result[index];
-                  return CustomCard(movie.id, movie.isMovie, movie.title,
+                  return CustomCard(movie.id, 1, movie.title,
                       movie.overview, movie.posterPath, 0);
                 },
                 itemCount: state.result.length,

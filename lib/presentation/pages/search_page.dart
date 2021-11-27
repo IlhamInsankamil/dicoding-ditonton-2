@@ -48,7 +48,7 @@ class SearchPage extends StatelessWidget {
                       padding: const EdgeInsets.all(8),
                       itemBuilder: (context, index) {
                         final movie = result[index];
-                        return CustomCard(movie.id, movie.isMovie, movie.title,
+                        return CustomCard(movie.id, 1, movie.title,
                             movie.overview, movie.posterPath, 0);
                       },
                       itemCount: result.length,
